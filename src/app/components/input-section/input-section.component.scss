@@ -1,9 +1,10 @@
-.input-container {
-  #githubUrlInput {
-    margin-bottom: 8px;
-  }
+.input-wrapper {
 
-  button#createLinkBtn {
-    margin-right: 8px;
+  .input-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
   }
 }
