@@ -3,7 +3,7 @@
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.9.
 
 ## What it does
-Download Files & Folder from github repo with one click
+Download Files & Folder from github public repos with one click
 
 ## Development server
 

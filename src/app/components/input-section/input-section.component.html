@@ -1,1 +1,7 @@
-<p>input-section works!</p>
+<div class="input-section-wrapper">
+  <h2>Paste GitHub URL to download files:</h2>
+  <input type="text" name="githubUrl" id="githubUrlInput" placeholder="Enter GitHub URL..." [(ngModel)]="githubUrl">
+  <button (click)="generateDownloadLink()">Create Download Link</button>
+  <button (click)="downloadFiles()">Download Files</button>
+</div>
+
