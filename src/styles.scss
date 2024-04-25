@@ -23,6 +23,10 @@ a:hover {
   color: #535bf2;
 }
 
+html {
+  font-size: 62.5%;
+}
+
 body {
   margin: 0;
   display: flex;
@@ -31,6 +35,8 @@ body {
   justify-content: center;
   min-width: 320px;
   min-height: 100vh;
+  font-size: 1.5rem;
+  line-height: 1.5;
 }
 
 h1 {
@@ -88,8 +94,8 @@ button:hover {
   // border-color: #646cff;
   background-color: #333;
 }
-button:focus,
-button:focus-visible {
+button:not([copy-button]):focus,
+button:not([copy-button]):focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 

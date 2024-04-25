@@ -93,3 +93,10 @@ export class GithubApiService {
     }
   }
 }
+
+//JSzip
+// We use JSZip library to create a zip file.
+// Inside the loop iterating over the files in the folder, we download each file's content asynchronously and add it to the zip using zip.file().
+// After adding all files to the zip, we generate the zip content using zip.generateAsync({ type: 'blob' }).
+// Then, we create a temporary URL for the zip content and initiate the download by creating a link element with the appropriate download attributes.
+// Finally, we remove the link element and revoke the temporary URL to free up memory.

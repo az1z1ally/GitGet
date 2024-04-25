@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GithubApiService } from '../../services/gitAPI.service';
+import { helper } from '../../shared/helpers/helper';
+import { DownloadLinkService } from '../../services/downloadLink.service';
 
 @Component({
   selector: 'app-input-section',
@@ -12,15 +14,20 @@ import { GithubApiService } from '../../services/gitAPI.service';
 export class InputSectionComponent {
   public githubUrl: string = '';
 
-  constructor (private gitAPIService: GithubApiService) {
-
-  }
+  constructor (
+    private gitAPIService: GithubApiService,
+    private downloadLinkService: DownloadLinkService
+  ) {}
 
   generateDownloadLink(): void {
-
+    if(this.githubUrl === '') {
+      return
+    }
+    const downloadLink = helper().generateAPIUrl(this.githubUrl)
+    this.downloadLinkService.setDownloadLink(downloadLink);
   }
 
-  downloadFiles(): void {
-    this.gitAPIService.downloadFolderFromGitHub(this.githubUrl)
+  async downloadFiles(): Promise<void> {
+   await this.gitAPIService.downloadFolderFromGitHub(this.githubUrl)
   }
 }
