@@ -44,7 +44,7 @@ export class AppComponent implements OnInit {
   }
 
   async downloadFiles(): Promise<void> {
-    await this.gitAPIService.downloadFolderFromGitHub(this.repoUrl)
+    await this.gitAPIService.downloadFolderFromGitHub(this.repoUrl.trim())
   }
   
 }

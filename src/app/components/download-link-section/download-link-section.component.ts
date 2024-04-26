@@ -34,7 +34,7 @@ export class DownloadLinkSectionComponent implements OnInit {
           }, 2000);
         }
       } catch (error) {
-        console.error('Error copying to clipboard:', error);
+        throw new Error(`Error copying to clipboard: ${error}`)
       }
     }
   };

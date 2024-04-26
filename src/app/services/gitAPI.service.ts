@@ -11,59 +11,63 @@ export class GithubApiService {
   // Fetch folder contents from GitHub API and download files
   downloadFolderFromGitHub = async (url: string): Promise<void> => {
     try {
-        const apiUrl = helper().generateAPIUrl(url.trim())
-        const folderPath = apiUrl.slice(apiUrl.lastIndexOf('/') + 1)
+      // Remove the url's trailing slash if it exists
+      const trimmedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+      const folderPath = trimmedUrl.split('/')[trimmedUrl.split('/').length - 1];
 
-        // Wait to comply with rate limiting
-        await helper().waitForRateLimit();
+      // Generate github API url
+      const apiUrl = helper().generateAPIUrl(trimmedUrl)
 
-        // Make a GET request to the GitHub API
-        const response = await fetch(apiUrl);
+      // Wait to comply with rate limiting
+      await helper().waitForRateLimit();
 
-        // Check if response status is within the successful range
-        if (!response.ok) {
-            throw new Error(`Failed to fetch folder contents: ${response.status} ${response.statusText}`);
-        }
+      // Make a GET request to the GitHub API
+      const response = await fetch(apiUrl);
 
-        // Parse the response JSON
-        const data = await response.json();
+      // Check if response status is within the successful range
+      if (!response.ok) {
+          throw new Error(`Failed to fetch folder contents: ${response.status} ${response.statusText}`);
+      }
 
-        // Create a zip file
-        const zip = new JSZip();
+      // Parse the response JSON
+      const data = await response.json();
 
-        // Add each file to the zip
-        for (const item of data) {
-            if (item.type === 'file') {
-              const fileName = item.name;
-              const fileUrl = item.download_url;
-              const fileContent = await this.downloadFile(fileUrl);
-              zip.file(fileName, fileContent);
-            }
-        }
+      // Create a zip file
+      const zip = new JSZip();
 
-        // Generate the zip content
-        const zipContent = await zip.generateAsync({ type: 'blob' });
-        
-        // Create a temporary URL for the zip
-        const zipUrl = URL.createObjectURL(zipContent);
-        
-        // Create a link element
-        const link = document.createElement('a');
-        link.href = zipUrl;
-        link.download = `${folderPath}.zip`; // Name the zip file after the folder path
-        link.style.display = 'none';
+      // Add each file to the zip
+      for (const item of data) {
+          if (item.type === 'file') {
+            const fileName = item.name;
+            const fileUrl = item.download_url;
+            const fileContent = await this.downloadFile(fileUrl);
+            zip.file(fileName, fileContent);
+          }
+      }
 
-        // Append the link to the body
-        document.body.appendChild(link);
+      // Generate the zip content
+      const zipContent = await zip.generateAsync({ type: 'blob' });
+      
+      // Create a temporary URL for the zip
+      const zipUrl = URL.createObjectURL(zipContent);
+      
+      // Create a link element
+      const link = document.createElement('a');
+      link.href = zipUrl;
+      link.download = `${folderPath}.zip`; // Name the zip file after the folder path
+      link.style.display = 'none';
 
-        // Trigger the click event to start the download
-        link.click();
+      // Append the link to the body
+      document.body.appendChild(link);
 
-        // Remove the link from the body
-        document.body.removeChild(link);
+      // Trigger the click event to start the download
+      link.click();
 
-        // Revoke the blob URL to free up memory
-        URL.revokeObjectURL(zipUrl);
+      // Remove the link from the body
+      document.body.removeChild(link);
+
+      // Revoke the blob URL to free up memory
+      URL.revokeObjectURL(zipUrl);
 
     } catch (error) {
         console.error('Error:', error);

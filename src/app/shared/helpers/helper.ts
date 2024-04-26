@@ -22,6 +22,8 @@ export const helper = () => {
   const extractGitHubInfo = (url: string): {repoOwner: string, repoName:string, folderPath:string} => {
     const regex = /^https:\/\/github.com\/([^/]+)\/([^/]+)(?:\/(?:tree|blob)\/main\/([^/]+\/?.*))?/;
     const match = url.match(regex);
+    console.log(url.match(regex));
+    
     if (match) {
         const [, repoOwner, repoName, folderPath] = match;
         // If folderPath is undefined (no match for folderPath), set it to an empty string

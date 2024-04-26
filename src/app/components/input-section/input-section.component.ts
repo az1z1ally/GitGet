@@ -24,11 +24,11 @@ export class InputSectionComponent {
       return
     }
     
-    const downloadLink = `http://localhost:4200/?url=${this.githubUrl}`
+    const downloadLink = `http://localhost:4200/?url=${this.githubUrl.trim()}`
     this.downloadLinkService.setDownloadLink(downloadLink)
   }
 
   async downloadFiles(): Promise<void> {
-   await this.gitAPIService.downloadFolderFromGitHub(this.githubUrl)
+   await this.gitAPIService.downloadFolderFromGitHub(this.githubUrl.trim())
   }
 }
