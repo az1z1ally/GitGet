@@ -11,7 +11,7 @@ export class GithubApiService {
   // Fetch folder contents from GitHub API and download files
   downloadFolderFromGitHub = async (url: string): Promise<void> => {
     try {
-        const apiUrl = helper().generateAPIUrl(url)
+        const apiUrl = helper().generateAPIUrl(url.trim())
         const folderPath = apiUrl.slice(apiUrl.lastIndexOf('/') + 1)
 
         // Wait to comply with rate limiting
@@ -43,10 +43,10 @@ export class GithubApiService {
 
         // Generate the zip content
         const zipContent = await zip.generateAsync({ type: 'blob' });
-
+        
         // Create a temporary URL for the zip
         const zipUrl = URL.createObjectURL(zipContent);
-
+        
         // Create a link element
         const link = document.createElement('a');
         link.href = zipUrl;
@@ -94,9 +94,21 @@ export class GithubApiService {
   }
 }
 
-//JSzip
-// We use JSZip library to create a zip file.
-// Inside the loop iterating over the files in the folder, we download each file's content asynchronously and add it to the zip using zip.file().
-// After adding all files to the zip, we generate the zip content using zip.generateAsync({ type: 'blob' }).
-// Then, we create a temporary URL for the zip content and initiate the download by creating a link element with the appropriate download attributes.
-// Finally, we remove the link element and revoke the temporary URL to free up memory.
+/*
+1. GitHub API Request:
+The code starts by constructing the API URL using the helper().generateAPIUrl(url) function. Ensure that the url parameter points to the correct GitHub repository or folder.
+The waitForRateLimit() function suggests that you’re handling rate limiting, which is essential when making API requests. Make sure you’re adhering to GitHub’s rate limits.
+
+2. Fetching Folder Contents:
+The code makes a GET request to the GitHub API using fetch(apiUrl). Verify that the API URL is correctly formed and that you have the necessary permissions to access the repository.
+The response status is checked, and an error is thrown if it’s not within the successful range. Consider adding error handling or logging for better debugging.
+
+3. Creating a Zip File:
+The JSZip library is used to create a zip file. Ensure that you’ve imported the library correctly.
+The loop iterates through each item in the API response. If the item is a file, it adds the file’s content to the zip using zip.file(fileName, fileContent).
+Finally, the zip content is generated and made available for download.
+
+3. Download Link:
+The code creates a temporary download link for the zip file. The link is hidden (link.style.display = 'none') and triggers the download when clicked.
+The zip file is named after the folder path.
+*/

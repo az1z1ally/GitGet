@@ -23,8 +23,9 @@ export class InputSectionComponent {
     if(this.githubUrl === '') {
       return
     }
-    const downloadLink = helper().generateAPIUrl(this.githubUrl)
-    this.downloadLinkService.setDownloadLink(downloadLink);
+    
+    const downloadLink = `http://localhost:4200/?url=${this.githubUrl}`
+    this.downloadLinkService.setDownloadLink(downloadLink)
   }
 
   async downloadFiles(): Promise<void> {

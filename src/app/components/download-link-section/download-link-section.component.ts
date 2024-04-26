@@ -28,7 +28,7 @@ export class DownloadLinkSectionComponent implements OnInit {
         if (textToCopy) {
           await navigator.clipboard.writeText(textToCopy);
           const originalText = this.codeBlockRef.nativeElement.textContent;
-          this.codeBlockRef.nativeElement.textContent = 'Copied';
+          this.codeBlockRef.nativeElement.textContent = 'Copied!';
           setTimeout(() => {
             this.codeBlockRef.nativeElement.textContent = originalText;
           }, 2000);
