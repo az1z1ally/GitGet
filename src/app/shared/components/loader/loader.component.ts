@@ -10,5 +10,7 @@ import { LoaderService } from '../../../services/loader.service';
   styleUrl: './loader.component.scss'
 })
 export class LoaderComponent {
-  constructor(public loaderService: LoaderService) {}
+  constructor(private loaderService: LoaderService) {}
+  
+  isLoading$ = this.loaderService.isLoading$
 }

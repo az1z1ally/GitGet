@@ -2,12 +2,12 @@
   <ng-container>
     <div class="code-snippet">
       <div class="code-header">
-          <button #codeBlock class="copy-button" (click)="copyDownloadLink()">Copy Link</button>
+          <button #codeBlock class="copy-button" (click)="copyDownloadLink(downloadLink)">Copy Link</button>
       </div>
       <pre>
         <code class="code-block">{{ downloadLink }}</code>
       </pre>
     </div>
   </ng-container>
-  <!-- <button (click)="copyDownloadLink()">Copy Link</button> -->
+  <!-- <button (click)="copyDownloadLink(downloadLink)">Copy Link</button> -->
 </div>

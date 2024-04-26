@@ -21,20 +21,21 @@ export class DownloadLinkSectionComponent implements OnInit {
   downloadLink$: Observable<string | null> = this.downloadLinkService.downloadLink$;
 
   // Copy download link to clipboard
-  copyDownloadLink = (): void => {
-    const range = document.createRange();
-    range.selectNode(this.codeBlockRef.nativeElement);
-    const selection = window.getSelection();
-    if (selection) {
-      selection.removeAllRanges();
-      selection.addRange(range);
-      document.execCommand('copy');
-      selection.removeAllRanges();
-      const originalText = this.codeBlockRef.nativeElement.textContent;
-      this.codeBlockRef.nativeElement.textContent = 'Copied';
-      setTimeout(() => {
-        this.codeBlockRef.nativeElement.textContent = originalText;
-      }, 2000);  // Reset to original text after 2 seconds
+  copyDownloadLink = async (link: string): Promise<void> => {
+    if (this.codeBlockRef) {
+      const textToCopy = link
+      try {
+        if (textToCopy) {
+          await navigator.clipboard.writeText(textToCopy);
+          const originalText = this.codeBlockRef.nativeElement.textContent;
+          this.codeBlockRef.nativeElement.textContent = 'Copied';
+          setTimeout(() => {
+            this.codeBlockRef.nativeElement.textContent = originalText;
+          }, 2000);
+        }
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+      }
     }
   };
 }

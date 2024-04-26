@@ -4,7 +4,8 @@ import {
   HttpInterceptor,
   HttpHandler,
   HttpRequest,
-  HttpResponse
+  HttpResponse,
+  HttpErrorResponse
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
@@ -19,7 +20,7 @@ export class LoaderInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     this.loaderService.show();
-    
+
     return next.handle(req).pipe(
       tap({
         next: event => {
@@ -27,14 +28,14 @@ export class LoaderInterceptor implements HttpInterceptor {
             this.loaderService.hide();
           }
         },
-        error: error => {
-          this.loaderService.hide();
+        error: (error: HttpErrorResponse) => {
+          throw new Error(`Error: ${error.error}`)
         }
       }),
+
       finalize(() => {
         this.loaderService.hide();
       })
     );
-    
   }
 }
