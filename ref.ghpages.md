@@ -211,3 +211,37 @@ If you get an error about a custom domain being taken, you may need to remove th
 If your GitHub Pages site is disabled but has a custom domain set up, it is at risk of a domain takeover. Having a custom domain configured with your DNS provider while your site is disabled could result in someone else hosting a site on one of your subdomains.
 
 Verifying your custom domain prevents other GitHub users from using your domain with their repositories. If your domain is not verified, and your GitHub Pages site is disabled, you should immediately update or remove your DNS records with your DNS provider.
+
+## DEPLOYING TO GH_PAGES
+$ ng add angular-cli-ghpages
+$ ng build --base-href https://[username].github.io/[repo]/`
+$ npx angular-cli-ghpages --dir=dist/[project-name]
+
+OR
+https://medium.com/tech-insights/how-to-deploy-angular-apps-to-github-pages-gh-pages-896c4e10f9b4
+
+$ git branch gh-pages
+$ git checkout gh-pages
+
+$ git checkout -b gh-pages
+$ git push origin gh-pages
+$ npm install -g angular-cli-ghpages`
+$ ng build --base-href https://[username].github.io/[repo]/`
+
+### deploy
+$ ngh --dir=dist/[project-name]`
+
+OR -but not suggested
+ng b --output-path docs --base-href /git-report-name  // This takes advantage of deploy from docs in github pages settings
+
+
+Note: 
+1. Make sure you put your “username”, “repo name” and the name of the project in place of “Project-name” in the commands above.
+
+2. Make sure go to the repository pages settings and change branch to 'gh-pages'
+
+You can find this in the angular.json file under defaultProject which is at the bottom of the file. If the project name is wrong, your App will not work; so if you are seeing any errors, check the angular.json to confirm if you used the correct project name.
+
+** You only need to set the “--base-href” flag once, next time you make changes and build the project you can simply run:
+
+$ ng build --prod

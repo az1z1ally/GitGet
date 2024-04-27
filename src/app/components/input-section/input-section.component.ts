@@ -24,7 +24,7 @@ export class InputSectionComponent {
       return
     }
     
-    const downloadLink = `http://localhost:4200/?url=${this.githubUrl.trim()}`
+    const downloadLink = `https://githives.com/?url=${this.githubUrl.trim()}`
     this.downloadLinkService.setDownloadLink(downloadLink)
   }
 
