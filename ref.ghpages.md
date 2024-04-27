@@ -215,7 +215,7 @@ Verifying your custom domain prevents other GitHub users from using your domain 
 ## DEPLOYING TO GH_PAGES
 $ ng add angular-cli-ghpages
 $ ng build --base-href https://[username].github.io/[repo]/`
-$ npx angular-cli-ghpages --dir=dist/[project-name]
+$ npx angular-cli-ghpages --dir=dist/[project-name]    eg. ng build --base-href https://githives.com/ since I'm using custom domain(githives)
 
 OR
 https://medium.com/tech-insights/how-to-deploy-angular-apps-to-github-pages-gh-pages-896c4e10f9b4

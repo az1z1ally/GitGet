@@ -8,6 +8,23 @@ import JSZip from 'jszip';
 export class GithubApiService {
   constructor() {}
 
+  async processItem(item: any, zip:JSZip, currentPath:string = '') {
+    const fullPath = currentPath + item.name;
+
+    if (item.type === 'file') {
+      const fileName = fullPath;
+      const fileUrl = item.download_url;
+      const fileContent = await this.downloadFile(fileUrl);
+      zip.file(fileName, fileContent); // add item to zip
+    } 
+    else if (item.type === 'dir') {
+      const dirContents = await fetch(item.url).then((res) => res.json());
+      for (const subItem of dirContents) {
+        await this.processItem(subItem, zip, fullPath + '/');
+      }
+    }
+  }
+
   // Fetch folder contents from GitHub API and download files
   downloadFolderFromGitHub = async (url: string): Promise<void> => {
     try {
@@ -35,21 +52,22 @@ export class GithubApiService {
       // Create a zip file
       const zip = new JSZip();
 
-      // Add each file to the zip
-      for (const item of data) {
-          if (item.type === 'file') {
-            const fileName = item.name;
-            const fileUrl = item.download_url;
-            const fileContent = await this.downloadFile(fileUrl);
-            zip.file(fileName, fileContent);
-          }
+      if (typeof data === 'object') {
+          // Add each file to the zip
+        if (Array.isArray(data)) {
+            for (const item of data) {
+              await this.processItem(item, zip);
+            }
+        } else {
+          // If data is just a single object
+          await this.processItem(data, zip);
+        }
       }
 
-      // Generate the zip content
-      const zipContent = await zip.generateAsync({ type: 'blob' });
-      
-      // Create a temporary URL for the zip
-      const zipUrl = URL.createObjectURL(zipContent);
+  
+
+      const zipBlob= await zip.generateAsync({ type: 'blob' }); // Create a blob object from the file content
+      const zipUrl = URL.createObjectURL(zipBlob); // Create a temporary URL for the zip
       
       // Create a link element
       const link = document.createElement('a');
@@ -116,3 +134,4 @@ Finally, the zip content is generated and made available for download.
 The code creates a temporary download link for the zip file. The link is hidden (link.style.display = 'none') and triggers the download when clicked.
 The zip file is named after the folder path.
 */
+

@@ -25,7 +25,7 @@ const COMPONENTS = [HeaderComponent, InputSectionComponent, DownloadLinkSectionC
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
-  title = 'GitGet';
+  title = 'GitHives';
   repoUrl: string = ''; // Initialize with an empty string
 
   constructor(
