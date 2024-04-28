@@ -6,9 +6,6 @@ import { InputSectionComponent } from './components/input-section/input-section.
 import { DownloadLinkSectionComponent } from './components/download-link-section/download-link-section.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { LoaderInterceptor } from './services/httpInterceptor.service';
-
 import { ActivatedRoute } from '@angular/router';
 import { GithubApiService } from './services/gitAPI.service';
 
@@ -17,12 +14,9 @@ const COMPONENTS = [HeaderComponent, InputSectionComponent, DownloadLinkSectionC
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HttpClientModule, COMPONENTS],
-  providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true }
-  ],
+  imports: [CommonModule, RouterOutlet, COMPONENTS],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
   title = 'GitHives';

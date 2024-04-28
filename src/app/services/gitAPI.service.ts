@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { helper } from '../shared/helpers/helper';
 import JSZip from 'jszip';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class GithubApiService {
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   async processItem(item: any, zip:JSZip, currentPath:string = '') {
     const fullPath = currentPath + item.name;
@@ -19,6 +21,7 @@ export class GithubApiService {
     } 
     else if (item.type === 'dir') {
       const dirContents = await fetch(item.url).then((res) => res.json());
+      
       for (const subItem of dirContents) {
         await this.processItem(subItem, zip, fullPath + '/');
       }
@@ -63,8 +66,6 @@ export class GithubApiService {
           await this.processItem(data, zip);
         }
       }
-
-  
 
       const zipBlob= await zip.generateAsync({ type: 'blob' }); // Create a blob object from the file content
       const zipUrl = URL.createObjectURL(zipBlob); // Create a temporary URL for the zip
