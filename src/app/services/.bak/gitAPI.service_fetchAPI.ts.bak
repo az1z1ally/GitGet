@@ -1,14 +1,30 @@
 import { Injectable } from '@angular/core';
 import { helper } from '../shared/helpers/helper';
 import JSZip from 'jszip';
-import { HttpService } from './http.service';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class GithubApiService {
-  constructor(private http: HttpService) {}
+  constructor() {}
+
+  async processItem(item: any, zip:JSZip, currentPath:string = '') {
+    const fullPath = currentPath + item.name;
+
+    if (item.type === 'file') {
+      const fileName = fullPath;
+      const fileUrl = item.download_url;
+      const fileContent = await this.downloadFile(fileUrl);
+      zip.file(fileName, fileContent); // add item to zip
+    } 
+    else if (item.type === 'dir') {
+      const dirContents = await fetch(item.url).then((res) => res.json());
+      for (const subItem of dirContents) {
+        await this.processItem(subItem, zip, fullPath + '/');
+      }
+    }
+  }
 
   // Fetch folder contents from GitHub API and download files
   downloadFolderFromGitHub = async (url: string): Promise<void> => {
@@ -41,11 +57,11 @@ export class GithubApiService {
           // Add each file to the zip
         if (Array.isArray(data)) {
             for (const item of data) {
-              await this.http.processItem(item, zip);
+              await this.processItem(item, zip);
             }
         } else {
           // If data is just a single object
-          await this.http.processItem(data, zip);
+          await this.processItem(data, zip);
         }
       }
 
@@ -74,6 +90,29 @@ export class GithubApiService {
         console.error('Error:', error);
     }
   }
+
+  // Function to download a file from a URL
+  private downloadFile = async(url: string): Promise<ArrayBuffer> => {
+  try {
+    // Wait to comply with rate limiting
+    await helper().waitForRateLimit();
+
+    // Fetch the file content asynchronously
+    const response = await fetch(url);
+
+    // Check if response status is within the successful range
+    if (!response.ok) {
+        throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
+    }
+
+    // Read the file content as an ArrayBuffer
+    const content = await response.arrayBuffer();
+    return content;
+
+    } catch (error) {
+        throw new Error(`Error: ${error}`)
+    }
+  }
 }
 
 /*
@@ -82,7 +121,7 @@ The code starts by constructing the API URL using the helper().generateAPIUrl(ur
 The waitForRateLimit() function suggests that you’re handling rate limiting, which is essential when making API requests. Make sure you’re adhering to GitHub’s rate limits.
 
 2. Fetching Folder Contents:
-The code makes a GET request to the GitHub API . Verify that the API URL is correctly formed and that you have the necessary permissions to access the repository.
+The code makes a GET request to the GitHub API using fetch(apiUrl). Verify that the API URL is correctly formed and that you have the necessary permissions to access the repository.
 The response status is checked, and an error is thrown if it’s not within the successful range. Consider adding error handling or logging for better debugging.
 
 3. Creating a Zip File:
@@ -94,3 +133,4 @@ Finally, the zip content is generated and made available for download.
 The code creates a temporary download link for the zip file. The link is hidden (link.style.display = 'none') and triggers the download when clicked.
 The zip file is named after the folder path.
 */
+
