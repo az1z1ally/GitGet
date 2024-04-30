@@ -31,7 +31,7 @@ export class GithubApiService {
     try {
       // Remove the url's trailing slash if it exists
       const trimmedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
-      const folderPath = trimmedUrl.split('/')[trimmedUrl.split('/').length - 1];
+      const folderPath = trimmedUrl.split('/').pop(); // const folderPath = trimmedUrl.split('/')[trimmedUrl.split('/').length - 1];
 
       // Generate github API url
       const apiUrl = helper().generateAPIUrl(trimmedUrl)
@@ -132,5 +132,114 @@ Finally, the zip content is generated and made available for download.
 3. Download Link:
 The code creates a temporary download link for the zip file. The link is hidden (link.style.display = 'none') and triggers the download when clicked.
 The zip file is named after the folder path.
+
+
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+// ...
+
+downloadFile(rawUrl: string, filename: string = null): void {
+  const headers = new HttpHeaders();
+  headers.set('Content-Type', 'application/octet-stream'); // Set appropriate content type
+
+  this.http.get(rawUrl, { headers, responseType: 'blob' as 'json' })
+    .subscribe((response: any) => {
+      const dataType = response.type;
+      const binaryData = [response];
+
+      const downloadLink = document.createElement('a');
+      downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: dataType }));
+
+      if (filename) {
+        downloadLink.setAttribute('download', filename);
+      }
+
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      
+    });
+}
+
+
+OR ==============
+import { HttpClient } from '@angular/common/http';
+import { saveAs } from 'file-saver'; // Import FileSaver.js for saving blobs
+
+// ...
+
+export class YourComponent {
+  constructor(private http: HttpClient) {}
+
+  // Function to download a file from a URL and return as a blob
+  private downloadFile(url: string): Observable<Blob> {
+    // Wait to comply with rate limiting (if needed)
+    // helper().waitForRateLimit();
+
+    return this.http.get(url, { responseType: 'blob' });
+  }
+
+  // Function to zip the received file content and initiate download
+  private downloadZippedFile(url: string, filename: string): void {
+    this.downloadFile(url).subscribe((data: Blob) => {
+      // Create a zip file containing the received data
+      const zipBlob = new Blob([data], { type: 'application/zip' });
+
+      // Save the zip file using FileSaver.js
+      saveAs(zipBlob, filename + '.zip');
+    });
+  }
+
+  // Example usage:
+  downloadZippedFile('http://example.com/myfile.xlsx', 'my-file');
+}
+
+OR ==================== USING JSZip
+import { HttpClient } from '@angular/common/http';
+import * as JSZip from 'jszip'; // Import JSZip library
+
+// ...
+
+export class YourComponent {
+  constructor(private http: HttpClient) {}
+
+  // Function to download a file from a URL and return as a blob
+  private downloadFile(url: string): Observable<Blob> {
+    // Wait to comply with rate limiting (if needed)
+    // helper().waitForRateLimit();
+
+    return this.http.get(url, { responseType: 'blob' });
+  }
+
+  // Function to zip the received file content and initiate download
+  private downloadZippedFile(url: string, filename: string): void {
+    this.downloadFile(url).subscribe((data: Blob) => {
+      // Create a new JSZip instance
+      const zip = new JSZip();
+
+      // Add the received data to the zip file
+      zip.file(filename + '.xlsx', data);
+
+      // Generate the zip content
+      zip.generateAsync({ type: 'blob' }).then((zipBlob) => {
+        // Save the zip file
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(zipBlob);
+        link.download = filename + '.zip';
+        document.body.appendChild(link);
+        link.click();
+
+         // Remove the link from the body
+        document.body.removeChild(link);
+
+        // Revoke the blob URL to free up memory
+        URL.revokeObjectURL(link.href);
+      });
+    });
+  }
+
+  // Example usage:
+  downloadZippedFile('http://example.com/myfile.xlsx', 'my-file');
+}
+
 */
 

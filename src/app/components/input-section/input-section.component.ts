@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GithubApiService } from '../../services/gitAPI.service';
-import { helper } from '../../shared/helpers/helper';
 import { DownloadLinkService } from '../../services/downloadLink.service';
 
 @Component({
@@ -28,7 +27,7 @@ export class InputSectionComponent {
     this.downloadLinkService.setDownloadLink(downloadLink)
   }
 
-  async downloadFiles(): Promise<void> {
-   await this.gitAPIService.downloadFolderFromGitHub(this.githubUrl.trim())
+  downloadFiles(): void {
+   this.gitAPIService.downloadFolderFromGitHub(this.githubUrl.trim())
   }
 }

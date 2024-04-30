@@ -8,13 +8,14 @@ import { FooterComponent } from './components/footer/footer.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { ActivatedRoute } from '@angular/router';
 import { GithubApiService } from './services/gitAPI.service';
+import { HttpClientModule } from '@angular/common/http';
 
 const COMPONENTS = [HeaderComponent, InputSectionComponent, DownloadLinkSectionComponent, FooterComponent, LoaderComponent] 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, COMPONENTS],
+  imports: [CommonModule, RouterOutlet, HttpClientModule, COMPONENTS],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
@@ -37,8 +38,8 @@ export class AppComponent implements OnInit {
     });
   }
 
-  async downloadFiles(): Promise<void> {
-    await this.gitAPIService.downloadFolderFromGitHub(this.repoUrl.trim())
+  downloadFiles(): void {
+    this.gitAPIService.downloadFolderFromGitHub(this.repoUrl.trim())
   }
   
 }
