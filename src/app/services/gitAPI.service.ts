@@ -9,11 +9,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
-export class GithubApiService {
+export class FileDownloaderService {
   constructor(private httpService: HttpService) {}
 
   // Fetch folder contents from GitHub API and download files
-  downloadFolderFromGitHub(url: string): void {
+  downloadFilesFromGitHub(url: string): void {
     const trimmedUrl: string = url.endsWith('/') ? url.slice(0, -1) : url; // Remove the url's trailing slash if it exists
     const folderPath = trimmedUrl.split('/').pop(); // Get the last segment of the URL
 

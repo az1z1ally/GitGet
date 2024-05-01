@@ -7,7 +7,7 @@ import { DownloadLinkSectionComponent } from './components/download-link-section
 import { FooterComponent } from './components/footer/footer.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { ActivatedRoute } from '@angular/router';
-import { GithubApiService } from './services/gitAPI.service';
+import { FileDownloaderService } from './services/gitAPI.service';
 import { HttpClientModule } from '@angular/common/http';
 
 const COMPONENTS = [HeaderComponent, InputSectionComponent, DownloadLinkSectionComponent, FooterComponent, LoaderComponent] 
@@ -25,7 +25,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private gitAPIService: GithubApiService
+    private fileDownloaderService: FileDownloaderService
   ) {}
 
   ngOnInit(): void {
@@ -39,7 +39,7 @@ export class AppComponent implements OnInit {
   }
 
   downloadFiles(): void {
-    this.gitAPIService.downloadFolderFromGitHub(this.repoUrl.trim())
+    this.fileDownloaderService.downloadFilesFromGitHub(this.repoUrl.trim())
   }
   
 }

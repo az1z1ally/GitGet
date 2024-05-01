@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GithubApiService } from '../../services/gitAPI.service';
+import { FileDownloaderService } from '../../services/gitAPI.service';
 import { DownloadLinkService } from '../../services/downloadLink.service';
 
 @Component({
@@ -14,7 +14,7 @@ export class InputSectionComponent {
   public githubUrl: string = '';
 
   constructor (
-    private gitAPIService: GithubApiService,
+    private fileDownloaderService: FileDownloaderService,
     private downloadLinkService: DownloadLinkService
   ) {}
 
@@ -28,6 +28,6 @@ export class InputSectionComponent {
   }
 
   downloadFiles(): void {
-   this.gitAPIService.downloadFolderFromGitHub(this.githubUrl.trim())
+   this.fileDownloaderService.downloadFilesFromGitHub(this.githubUrl.trim())
   }
 }

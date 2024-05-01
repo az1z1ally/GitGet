@@ -27,7 +27,7 @@ export class GithubApiService {
   }
 
   // Fetch folder contents from GitHub API and download files
-  downloadFolderFromGitHub = async (url: string): Promise<void> => {
+  downloadFilesFromGitHub = async (url: string): Promise<void> => {
     try {
       // Remove the url's trailing slash if it exists
       const trimmedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
