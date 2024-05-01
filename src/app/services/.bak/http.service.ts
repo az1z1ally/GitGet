@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { helper } from '../shared/helpers/helper';
+import { helper } from '../../shared/helpers/helper';
 import JSZip from 'jszip';
 
 @Injectable({

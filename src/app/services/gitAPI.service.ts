@@ -33,8 +33,6 @@ export class FileDownloaderService {
       mergeMap((data: any[]) => data), // Flatten the array of items to process each item individually
       mergeMap((item: any) => this.processItem(item, zip), 4) // Limit concurrency to 4 requests
     ).subscribe(
-      () => {}, // No-op for completion
-      error => console.error('Error occurred:', error),
       () => {
         // Generate zip Url & download
         this.generateZip(zip, folderPath);
@@ -43,6 +41,7 @@ export class FileDownloaderService {
   }
 
 
+  // Recursively download and add files to zip
   private processItem(item: any, zip: JSZip, currentPath: string = ''): Observable<void> {
     const fullPath = currentPath + item.name;
   
@@ -57,7 +56,6 @@ export class FileDownloaderService {
           throw new Error(`Error downloading file from ${fileUrl}: ${error.statusText}`);
         }),
         tap(fileContent => {
-          console.log(fileName);
           zip.file(fileName, fileContent); // add item to zip
         }),
         map(() => void 0) // Transform emitted value into void
@@ -108,6 +106,18 @@ export class FileDownloaderService {
 
 /*
 EXPLANATION:
+1. MergeMap:
+mergeMap is an operator provided by RxJS. It's often used to transform each item emitted by the source observable into an observable, and then merge those observables into a single observable stream.
+Here mergeMap is used in the processItem method within the block where the type of the item is 'dir' (directory). This is where recursion happens for processing nested directories.
+When a directory is encountered, mergeMap is used to transform the array of directory contents (dirContents) into a stream of observables. Each observable represents the processing of a single item (either a file or another directory) within the directory.
+By using mergeMap, the observables generated for processing each item are merged into a single observable stream, ensuring that the processing of each item happens concurrently but in a controlled manner (since you're already limiting concurrency with mergeMap in your downloadFilesFromGitHub method).
+
+2. From:
+from is a creation operator provided by RxJS. It's used to create an observable from an array, iterable, or promise.
+Here, from is used within mergeMap to convert the array of directory contents (dirContents) into an observable stream.
+By using from, each item in the array (subItem) becomes an emission in the resulting observable stream. This allows you to apply operators like mergeMap or concatMap to process each item individually within the observable stream.
+
+**** this is before
 For the fetchDirContents call:
 Originally, after fetching directory contents, you were using the tap operator to perform a side effect (processing the directory contents) without altering the emitted value. However, since tap doesn't transform the emitted value, it wasn't returning void, which caused a type mismatch.
 To align the return type with Observable<void>, we need to ensure that the emitted value is void. Since the fetchDirContents method returns Observable<any[]>, we need to transform the emitted value into void.
