@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import JSZip from 'jszip';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { helper } from '../shared/helpers/helper';
-import { Observable, forkJoin, of } from 'rxjs';
+import { Observable, forkJoin, from, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
@@ -17,7 +17,7 @@ export class FileDownloaderService {
     const trimmedUrl: string = url.endsWith('/') ? url.slice(0, -1) : url; // Remove the url's trailing slash if it exists
     const folderPath = trimmedUrl.split('/').pop(); // Get the last segment of the URL
 
-     // Generate GitHub API url
+    // Generate GitHub API url
     const apiUrl = helper().generateAPIUrl(trimmedUrl);
 
     // Create a zip file
@@ -30,26 +30,26 @@ export class FileDownloaderService {
         throw new Error(`Failed to fetch folder contents: ${error}`);
       }),
       map((data: any) => Array.isArray(data) ? data : [data]), // Ensure data is always an array
-      tap((data: any[]) => {
-        const observables: Observable<void>[] = [];
-        data.forEach(item => {
-          observables.push(this.processItem(item, zip));
-        });
-        return forkJoin(observables); // Wait for all observables to complete(waits for all the HTTP requests (for files and directories) to finish processing.)
-      })
-    ).subscribe(() => {
-      // Generate zip Url & download
-      this.generateZip(zip, folderPath);
-    });
+      mergeMap((data: any[]) => data), // Flatten the array of items to process each item individually
+      mergeMap((item: any) => this.processItem(item, zip), 4) // Limit concurrency to 4 requests
+    ).subscribe(
+      () => {}, // No-op for completion
+      error => console.error('Error occurred:', error),
+      () => {
+        // Generate zip Url & download
+        this.generateZip(zip, folderPath);
+      }
+    );
   }
+
 
   private processItem(item: any, zip: JSZip, currentPath: string = ''): Observable<void> {
     const fullPath = currentPath + item.name;
-
+  
     if (item.type === 'file') {
       const fileName = fullPath;
       const fileUrl = item.download_url;
-
+  
       return this.httpService.downloadFile(fileUrl).pipe(
         catchError((error: HttpErrorResponse)=> {
           // Handle HTTP errors
@@ -57,37 +57,34 @@ export class FileDownloaderService {
           throw new Error(`Error downloading file from ${fileUrl}: ${error.statusText}`);
         }),
         tap(fileContent => {
+          console.log(fileName);
           zip.file(fileName, fileContent); // add item to zip
         }),
         map(() => void 0) // Transform emitted value into void
       );
-
+  
     } else if (item.type === 'dir') {
-      console.log('dir top');
-      
       return this.httpService.fetchDirContents(item.url).pipe(
         catchError(error => {
           console.warn(`Directory contents for ${fullPath} are null.`);
           return of([]); // Return empty array to continue processing
         }),
-        tap((dirContents: any[]) => {
+        mergeMap((dirContents: any[]) => {
           if (dirContents) {
-            const observables: Observable<void>[] = [];
-            dirContents.forEach(subItem => {
-              observables.push(this.processItem(subItem, zip, fullPath + '/'));
-            });
-            return forkJoin(observables); // Wait for all observables to complete
+            return from(dirContents).pipe(
+              mergeMap(subItem => this.processItem(subItem, zip, fullPath + '/'))
+            );
           } else {
             console.warn(`Directory contents for ${fullPath} are null.`);
-            return of(void 0); // Return undefined observable
+            return of(void 0); // Continue processing even if directory contents are null
           }
-        }),
-        map(() => void 0) // Transform emitted value into void
+        })
       );
     } else {
       return of(void 0); // Return undefined observable for unsupported item types
     }
   }
+  
 
   private generateZip(zip: JSZip, folderPath: string | undefined): void {
     zip.generateAsync({ type: 'blob' }).then((zipBlob: Blob) => {
