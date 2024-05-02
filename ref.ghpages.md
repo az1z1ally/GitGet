@@ -249,3 +249,22 @@ You can find this in the angular.json file under defaultProject which is at the 
 ** You only need to set the “--base-href” flag once, next time you make changes and build the project you can simply run:
 
 $ ng build --prod
+
+## SEO
+1. Open index.html:
+- Open the index.html file located in the src directory of your Angular project.
+
+2. Add Meta Description:
+Inside the <head> section of the HTML file, add the following meta tag for the description:
+`<meta name="description" content="Githives - A hassle-free way to download specific files and folders from GitHub repositories. Say goodbye to cloning massive repos! Create shareable links for your files.">
+`
+
+3. Add Page Title:
+Inside the <head> section of the HTML file, add the following <title> tag:
+`<title>Githives - Hassle-free GitHub Repo Downloads</title>`
+
+4. Schema Markup:
+Implement structured data/schema markup to provide search engines with detailed information about your app's content, such as its features, supported platforms, reviews, and more.
+Use tools like Google's Structured Data Markup Helper or Schema.org to generate schema markup code and add it to your Angular app's pages.
+
+Add the generated schema markup to your Angular app's HTML pages. You can include it in the <head> section of each page or directly within relevant elements, such as product descriptions or reviews.
