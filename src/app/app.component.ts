@@ -8,14 +8,13 @@ import { FooterComponent } from './components/footer/footer.component';
 import { LoaderComponent } from './shared/components/loader/loader.component';
 import { ActivatedRoute } from '@angular/router';
 import { FileDownloaderService } from './services/gitAPI.service';
-import { HttpClientModule } from '@angular/common/http';
 
 const COMPONENTS = [HeaderComponent, InputSectionComponent, DownloadLinkSectionComponent, FooterComponent, LoaderComponent] 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HttpClientModule, COMPONENTS],
+  imports: [CommonModule, RouterOutlet, COMPONENTS],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })

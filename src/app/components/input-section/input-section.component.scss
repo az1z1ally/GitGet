@@ -7,4 +7,10 @@
     align-items: center;
     gap: 10px;
   }
+
+  .heading-title {
+    font-size: clamp(1em, 4vw, 1.5em);
+    letter-spacing: 1px;
+    font-family: monospace;
+  }
 }

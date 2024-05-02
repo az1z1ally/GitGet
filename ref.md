@@ -79,6 +79,7 @@ bootstrapApplication(AppComponent, {
     providers: [
         provideRouter(routes),
         provideHttpClient(withFetch()) // provideHttpClient()
+        importProvidersFrom(HttpClientModule),
     ]
 }).catch((err) =>
     console.error(err)
@@ -88,7 +89,6 @@ bootstrapApplication(AppComponent, {
 //app.component.ts
 
 import { CommonModule, JsonPipe, NgIf } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MyServiceService } from './my-service.service';
@@ -96,7 +96,7 @@ import { MyServiceService } from './my-service.service';
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterOutlet, JsonPipe, HttpClientModule],
+    imports: [RouterOutlet, JsonPipe ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })
@@ -170,45 +170,3 @@ https://www.geeksforgeeks.org/using-a-http-service-in-angular-17-with-standalone
   The HttpClientModule is indeed a module, not a component. It provides the HttpClient service for making HTTP requests.
 `You should import HttpClientModule in your app’s main module (usually app.module.ts) to make the HttpClient service available throughout your application.`
 */
-
-
-## OBSERVABLES RXJS
-`
-// Create a zip file
-const zip = new JSZip();
-
-// Array to hold observables for each item processing
-const observables: Observable<any>[] = [];
-
-if (Array.isArray(data)) {
-  // Add each file processing observable to the array
-  for (const item of data) {
-    observables.push(this.http.processItem(item, zip));
-  }
-} else {
-  // If data is just a single object
-  observables.push(this.http.processItem(data, zip));
-}
-
-// Wait for all observables to complete before generating the zip
-forkJoin(observables).subscribe(() => {
-  // Log the list of files contained in the zip
-  console.log('Files added to the zip:', Object.keys(zip.files));
-
-  zip.generateAsync({ type: 'blob' }).then((zipBlob: Blob) => {
-    const zipUrl = URL.createObjectURL(zipBlob); // Create a temporary URL for the zip
-    const link = document.createElement('a');
-    link.href = zipUrl;
-    link.download = `${folderPath}.zip`; // Name the zip file after the folder path
-    link.style.display = 'none';
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(zipUrl); // Revoke the blob URL to free up memory
-  }).catch(error => {
-    console.error(`Error generating zip file: ${error}`);
-    throw new Error(`Error generating zip file: ${error}`);
-  });
-});
-`

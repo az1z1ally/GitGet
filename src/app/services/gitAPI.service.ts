@@ -33,6 +33,8 @@ export class FileDownloaderService {
       mergeMap((data: any[]) => data), // Flatten the array of items to process each item individually
       mergeMap((item: any) => this.processItem(item, zip), 4) // Limit concurrency to 4 requests
     ).subscribe(
+      () => {}, // No-op for completion
+      error => console.error('Error occurred:', error),
       () => {
         // Generate zip Url & download
         this.generateZip(zip, folderPath);
