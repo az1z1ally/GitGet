@@ -1,3 +1,6 @@
+import { environment } from "../../../environments/environment";
+import { NetworkErrorsEnum } from "../types/errors.enum";
+
 export const helper = () => {
   // Global variable to track the time when the last request was made
   let lastRequestTime = 0;
@@ -22,14 +25,14 @@ export const helper = () => {
   const extractGitHubInfo = (url: string): {repoOwner: string, repoName:string, folderPath:string} => {
     const regex = /^https:\/\/github.com\/([^/]+)\/([^/]+)(?:\/(?:tree|blob)\/main\/([^/]+\/?.*))?/;
     const match = url.match(regex);
-    console.log(url.match(regex));
+    // console.log(url.match(regex));
     
     if (match) {
         const [, repoOwner, repoName, folderPath] = match;
         // If folderPath is undefined (no match for folderPath), set it to an empty string
         return { repoOwner, repoName, folderPath: folderPath || '' }; //URL doesn't contain the /tree/main/ or /blob/main/ part. Additionally, it should still work when the URL points directly to the repository without specifying a file or folder within it
     } else {
-        throw new Error('Invalid GitHub URL');
+        throw new Error('Invalid GitHub URL!', {cause: `${NetworkErrorsEnum.invalid}`});
     }
   }
 
@@ -39,13 +42,24 @@ export const helper = () => {
     const { repoOwner, repoName, folderPath } = extractGitHubInfo(url);
 
     // Construct the API URL
-    return `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`
+    return `${environment.config.apiUrl}/${repoOwner}/${repoName}/contents/${folderPath}`
   }
+
+  // Check for a connection status(internet)
+  const checkConnectionStatus = async () => {
+    try {
+      const response = await fetch('/assets/empty.json');
+      return response.ok // either true or false
+    } catch (err) {
+      return false; // definitely offline / connection issue
+    }
+  };
 
   return {
     lastRequestTime,
     waitForRateLimit,
     extractGitHubInfo,
-    generateAPIUrl
+    generateAPIUrl,
+    checkConnectionStatus
   }
 }

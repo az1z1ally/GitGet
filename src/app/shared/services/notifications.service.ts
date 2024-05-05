@@ -12,15 +12,15 @@ export class NotificationService {
   }
 
   showError<T extends object>(message: string, title?: string, options?: T) {
-    this.toastr.success(message, title, options);
+    this.toastr.error(message, title, options);
   }
 
   showInfo<T extends object>(message: string, title?: string, options?: T) {
-    this.toastr.success(message, title, options);
+    this.toastr.info(message, title, options);
   }
 
   showWarning<T extends object>(message: string, title?: string, options?: T) {
-    this.toastr.success(message, title, options);
+    this.toastr.warning(message, title, options);
   }
   
 }

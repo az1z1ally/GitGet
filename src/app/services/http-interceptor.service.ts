@@ -7,47 +7,61 @@ import {
   HttpResponse,
   HttpErrorResponse
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
 import { LoaderService } from './loader.service';
+import { NotificationService } from '../shared/services/notifications.service';
+import { helper } from '../shared/helpers/helper';
+import { NetworkErrorsEnum } from '../shared/types/errors.enum';
 
 @Injectable()
 export class LoaderInterceptor implements HttpInterceptor {
   constructor(
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private notificationService: NotificationService
   ) {}
 
   intercept(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    // console.log('Interceptor is intercepting HTTP request:', req.url);
+
     this.loaderService.show(); // Show loader when request starts
-    
-    // Pass the request through to the next handler
-    return next.handle(req).pipe(
-      tap({
-        next: event => {
-          if (event instanceof HttpResponse) {
-            setTimeout(() => this.loaderService.hide(), 1500) // Hide loader on successful response
-          }
-        },
-        error: (error: HttpErrorResponse) => {
-          this.loaderService.hide(); // Hide loader on error
-          // this.toastrService.error('An error occurred. Please try again later.', error.error); // Display error message to the user
-          throw new Error(`Error: ${error.error}`) 
+
+    return new Observable<HttpEvent<any>>(observer => {
+      helper().checkConnectionStatus()
+      .then(resp => {
+        if (resp) {
+          // Pass the request through to the next handler
+          const handle = next.handle(req).pipe(
+            tap({
+              next: event => {
+                if (event instanceof HttpResponse) {
+                  setTimeout(() => this.loaderService.hide(), 1500); // Hide loader on successful response
+                }
+              },
+              error: (error: HttpErrorResponse) => {
+                setTimeout(() => this.loaderService.hide(), 1000); // Hide loader on error
+                throw new Error(`An error occurred. Please try again later!`, {cause: `${NetworkErrorsEnum.unknown}`});
+              }
+            }),
+            finalize(() => {
+              setTimeout(() => this.loaderService.hide(), 1500); // Hide loader when request completes (whether successful or not)
+            })
+          );
+          handle.subscribe(observer); // Subscribe to the observable returned by next.handle(req)
+        } else {
+          throw new Error('Make sure your device is connected to the internet & try again!', {cause: `${NetworkErrorsEnum.connection}`});
         }
-      }),
-
-      finalize(() => {
-        setTimeout(() => this.loaderService.hide(), 1500) // Hide loader when request completes (whether successful or not)
       })
-    );
-
+      .catch(error => {
+        setTimeout(() => this.loaderService.hide(), 400); // Hide loader on connection error
+        this.notificationService.showError(`${error} ⚡🫢`, `${NetworkErrorsEnum.connection}:`);
+        //observer.complete(); // Complete the observer
+      });
+    });
   }
 }
-
-
 
 
 /*

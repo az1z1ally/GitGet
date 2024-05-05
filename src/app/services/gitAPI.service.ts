@@ -3,41 +3,69 @@ import { HttpService } from './http.service';
 import JSZip from 'jszip';
 import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { helper } from '../shared/helpers/helper';
-import { Observable, forkJoin, from, of } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin, from, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { NotificationService } from '../shared/services/notifications.service';
+import { NetworkErrorsEnum } from '../shared/types/errors.enum';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FileDownloaderService {
-  constructor(private httpService: HttpService) {}
+  private isDownloadingSubject = new BehaviorSubject<boolean>(false)
+  isDownloading$ = this.isDownloadingSubject.asObservable()
+
+  constructor(
+    private httpService: HttpService,
+    private notificationService: NotificationService
+  ) {}
+
+  setIsLoading() {
+    this.isDownloadingSubject.next(true)
+  }
+
+  unsetIsLoading() {
+    this.isDownloadingSubject.next(false)
+  }
 
   // Fetch folder contents from GitHub API and download files
   downloadFilesFromGitHub(url: string): void {
     const trimmedUrl: string = url.endsWith('/') ? url.slice(0, -1) : url; // Remove the url's trailing slash if it exists
     const folderPath = trimmedUrl.split('/').pop(); // Get the last segment of the URL
 
-    // Generate GitHub API url
-    const apiUrl = helper().generateAPIUrl(trimmedUrl);
+    let apiUrl: string = ''
+
+    try {
+      // Generate GitHub API url
+       apiUrl = helper().generateAPIUrl(trimmedUrl);
+    } catch(error) {
+      // console.error(error);
+      this.notificationService.showError(`${error}. ⚡🫢`, `${NetworkErrorsEnum.invalid}:`);
+      return
+    }
 
     // Create a zip file
     const zip = new JSZip();
 
     // Make a GET request to the GitHub API
     this.httpService.fetchData(apiUrl).pipe(
-      catchError(error => {
-        console.error(`Failed to fetch folder contents: ${error}`);
-        throw new Error(`Failed to fetch folder contents: ${error}`);
+      catchError((error: HttpErrorResponse) => {
+        // console.error(error);
+        throw new Error(`${error.message} Failed to fetch folder contents.`);
       }),
       map((data: any) => Array.isArray(data) ? data : [data]), // Ensure data is always an array
+      tap(() => this.setIsLoading()),
       mergeMap((data: any[]) => data), // Flatten the array of items to process each item individually
       mergeMap((item: any) => this.processItem(item, zip), 4) // Limit concurrency to 4 requests
     ).subscribe(
       () => {}, // No-op for completion
-      error => console.error('Error occurred:', error),
+      error => this.notificationService.showError(`${error.message}. ⚡🫢`, `${NetworkErrorsEnum.unknown}:`),
+
       () => {
         // Generate zip Url & download
         this.generateZip(zip, folderPath);
+        this.notificationService.showSuccess(`Files downloaded successfully. 🤗`)
+        //this.unsetIsLoading() // Set is loading to false
       }
     );
   }
@@ -54,8 +82,8 @@ export class FileDownloaderService {
       return this.httpService.downloadFile(fileUrl).pipe(
         catchError((error: HttpErrorResponse)=> {
           // Handle HTTP errors
-          console.error(`Error downloading file from ${fileUrl}:`, error.message || error);
-          throw new Error(`Error downloading file from ${fileUrl}: ${error.statusText}`);
+          //console.error(`Error downloading file from ${fileUrl}.`, `${error.message || error}`);
+          throw new Error(`Error downloading file from ${fileUrl}: ${error.name}`);
         }),
         tap(fileContent => {
           zip.file(fileName, fileContent); // add item to zip
@@ -66,7 +94,7 @@ export class FileDownloaderService {
     } else if (item.type === 'dir') {
       return this.httpService.fetchDirContents(item.url).pipe(
         catchError(error => {
-          console.warn(`Directory contents for ${fullPath} are null.`);
+          this.notificationService.showWarning(`Directory contents for ${fullPath} are null. ⚠️`);
           return of([]); // Return empty array to continue processing
         }),
         mergeMap((dirContents: any[]) => {
@@ -75,7 +103,7 @@ export class FileDownloaderService {
               mergeMap(subItem => this.processItem(subItem, zip, fullPath + '/'))
             );
           } else {
-            console.warn(`Directory contents for ${fullPath} are null.`);
+            this.notificationService.showWarning(`Directory contents for ${fullPath} are null. ⚠️`);
             return of(void 0); // Continue processing even if directory contents are null
           }
         })
@@ -99,11 +127,14 @@ export class FileDownloaderService {
       document.body.removeChild(link);
       URL.revokeObjectURL(zipUrl); // Revoke the blob URL to free up memory
     }).catch((error: any) => {
-      console.error(`Error generating zip file: ${error}`);
-      throw new Error(`Error generating zip file: ${error}`);
+      // console.error(`Error generating zip file: ${error}`);
+      this.notificationService.showError(`Error generating zip file. ⚡🫢`, `${NetworkErrorsEnum.zipError}:`)
+      // throw new Error(`Error generating zip file: ${error}`);
     });
   }
 }
+
+
 
 
 /*
