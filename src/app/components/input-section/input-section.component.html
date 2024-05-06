@@ -1,9 +1,10 @@
 <div class="input-wrapper">
   <h2 class="heading-title">Paste GitHub URL to download files:</h2>
   <div class="input-content">
-    <input #url type="url" name="githubUrl" id="githubUrlInput" placeholder="Enter GitHub URL..." [(ngModel)]="githubUrl">
-    <button #downLoadBtn (click)="downloadFiles()" id="downloadBtn" [disabled]="!(isDownloading$ | async) && url.value == ''">Download Files</button>
-    <button #createLinkBtn (click)="generateDownloadLink()" id="createLinkBtn" [disabled]="url.value == ''">Generate Download Link</button>
+    <form [formGroup]="form" (ngSubmit)="downloadFiles()">
+      <input #url type="url" formControlName="url" id="githubUrlInput" placeholder="Enter GitHub URL...">
+      <button #downLoadBtn id="downloadBtn" type="submit" [disabled]="(isDownloading$ | async) || url.value == ''">Download Files</button>
+      <button #createLinkBtn type="button" (click)="generateDownloadLink()" id="createLinkBtn" [disabled]="url.value == ''">Generate Download Link</button>
+    </form>
   </div>
 </div>
-

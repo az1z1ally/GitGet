@@ -53,19 +53,20 @@ export class FileDownloaderService {
         // console.error(error);
         throw new Error(`${error.message} Failed to fetch folder contents.`);
       }),
-      map((data: any) => Array.isArray(data) ? data : [data]), // Ensure data is always an array
       tap(() => this.setIsLoading()),
+      map((data: any) => Array.isArray(data) ? data : [data]), // Ensure data is always an array
       mergeMap((data: any[]) => data), // Flatten the array of items to process each item individually
       mergeMap((item: any) => this.processItem(item, zip), 4) // Limit concurrency to 4 requests
     ).subscribe(
       () => {}, // No-op for completion
-      error => this.notificationService.showError(`${error.message}. ⚡🫢`, `${NetworkErrorsEnum.unknown}:`),
+      error => {
+        this.notificationService.showError(`${error.message}. ⚡🫢`, `${NetworkErrorsEnum.unknown}:`)
+        this.unsetIsLoading() // Set isDownloading$ to false
+      },
 
       () => {
         // Generate zip Url & download
         this.generateZip(zip, folderPath);
-        this.notificationService.showSuccess(`Files downloaded successfully. 🤗`)
-        //this.unsetIsLoading() // Set is loading to false
       }
     );
   }
@@ -126,10 +127,14 @@ export class FileDownloaderService {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(zipUrl); // Revoke the blob URL to free up memory
+
+      this.notificationService.showSuccess(`Files downloaded successfully. 🤗`)
+      this.unsetIsLoading() // Set isDownloading$ to false
     }).catch((error: any) => {
       // console.error(`Error generating zip file: ${error}`);
       this.notificationService.showError(`Error generating zip file. ⚡🫢`, `${NetworkErrorsEnum.zipError}:`)
       // throw new Error(`Error generating zip file: ${error}`);
+      this.unsetIsLoading() // Set isDownloading$ to false
     });
   }
 }

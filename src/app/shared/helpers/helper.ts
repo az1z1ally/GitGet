@@ -23,12 +23,13 @@ export const helper = () => {
 
   // Extract repository owner, repository name, and folder path from the GitHub URL
   const extractGitHubInfo = (url: string): {repoOwner: string, repoName:string, folderPath:string} => {
-    const regex = /^https:\/\/github.com\/([^/]+)\/([^/]+)(?:\/(?:tree|blob)\/main\/([^/]+\/?.*))?/;
+    // const regex = /^https:\/\/github.com\/([^/]+)\/([^/]+)(?:\/(?:tree|blob)\/main\/([^/]+\/?.*))?/;
+    const regex = /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/|www\.)?github.com\/([^/]+)\/([^/]+)(?:\/(?:tree|blob)\/main\/([^/]+\/?.*))?/;
     const match = url.match(regex);
     // console.log(url.match(regex));
     
     if (match) {
-        const [, repoOwner, repoName, folderPath] = match;
+        const [, , repoOwner, repoName, folderPath] = match;
         // If folderPath is undefined (no match for folderPath), set it to an empty string
         return { repoOwner, repoName, folderPath: folderPath || '' }; //URL doesn't contain the /tree/main/ or /blob/main/ part. Additionally, it should still work when the URL points directly to the repository without specifying a file or folder within it
     } else {

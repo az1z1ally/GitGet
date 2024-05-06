@@ -293,7 +293,7 @@ Here's the new load event listener:
   const statusDisplay = document.getElementById("status");
   statusDisplay.textContent = (await checkConnectionStatus())
     ? "Online"
-    : "OFFline";
+    : "Offline";
 });`
 
 5. A Final Thought
