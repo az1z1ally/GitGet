@@ -7,13 +7,14 @@ import { LoaderInterceptor } from './services/http-interceptor.service';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 import { ToastrConfig } from './toast-config';
+import { ReactiveFormsModule } from '@angular/forms';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes), 
     provideClientHydration(), 
     provideHttpClient(withFetch()),
-    importProvidersFrom(HttpClientModule),
+    importProvidersFrom(HttpClientModule, ReactiveFormsModule),
     { 
       provide: HTTP_INTERCEPTORS, 
       useClass: LoaderInterceptor, 
