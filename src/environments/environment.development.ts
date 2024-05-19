@@ -1,5 +1,5 @@
 export const environment = {
-  production: true,
+  production: false,
   config:{
     apiUrl:'https://api.github.com/repos',
     frontEndURL: 'http://localhost:4200'
